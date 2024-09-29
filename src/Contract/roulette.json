@@ -1,0 +1,182 @@
+{
+  "address": "mvtjnnwtwXKExeWAoMwemapbBxa2QUsr3TQfWHmMmzf",
+  "metadata": {
+    "name": "roullete",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "join_session",
+      "discriminator": [23, 92, 4, 160, 155, 56, 164, 253],
+      "accounts": [
+        {
+          "name": "session",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 101, 115, 115, 105, 111, 110]
+              }
+            ]
+          }
+        },
+        {
+          "name": "player",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "recent_slothashes",
+          "address": "SysvarS1otHashes111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "shoot",
+      "discriminator": [41, 43, 22, 19, 8, 30, 7, 103],
+      "accounts": [
+        {
+          "name": "session",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 101, 115, 115, 105, 111, 110]
+              }
+            ]
+          }
+        },
+        {
+          "name": "shooter",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "target",
+          "type": "pubkey"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Session",
+      "discriminator": [243, 81, 72, 115, 214, 188, 72, 144]
+    }
+  ],
+  "events": [
+    {
+      "name": "MementoMori",
+      "discriminator": [119, 151, 207, 175, 37, 122, 13, 239]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "SessionAlreadyOver"
+    },
+    {
+      "code": 6001,
+      "name": "SessionAlreadyStarted"
+    },
+    {
+      "code": 6002,
+      "name": "NotPlayersTurn"
+    }
+  ],
+  "types": [
+    {
+      "name": "MementoMori",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "shooter",
+            "type": "pubkey"
+          },
+          {
+            "name": "target",
+            "type": "pubkey"
+          },
+          {
+            "name": "winner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Session",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "player_one",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "player_two",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "turn",
+            "type": "bool"
+          },
+          {
+            "name": "load",
+            "type": {
+              "array": ["bool", 6]
+            }
+          },
+          {
+            "name": "trigger",
+            "type": "u8"
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "State"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "State",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Won",
+            "fields": [
+              {
+                "name": "winner",
+                "type": "pubkey"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
