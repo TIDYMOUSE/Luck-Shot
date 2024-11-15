@@ -1,0 +1,26 @@
+[toolchain]
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+roullete = "C4CFz2gwxM2MUrLTgyzySfM3MTwCauFtKmStfhpZqYTD"
+
+[program.devnet]
+roullete = "C4CFz2gwxM2MUrLTgyzySfM3MTwCauFtKmStfhpZqYTD"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[test]
+startup_wait = 20000
+shutdown_wait = 2000
+upgradeable = false

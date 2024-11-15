@@ -1,0 +1,302 @@
+{
+  "address": "C4CFz2gwxM2MUrLTgyzySfM3MTwCauFtKmStfhpZqYTD",
+  "metadata": {
+    "name": "roullete",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "join_session",
+      "discriminator": [23, 92, 4, 160, 155, 56, 164, 253],
+      "accounts": [
+        {
+          "name": "session",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 101, 115, 115, 105, 111, 110]
+              },
+              {
+                "kind": "account",
+                "path": "player_one"
+              },
+              {
+                "kind": "account",
+                "path": "player_two"
+              },
+              {
+                "kind": "arg",
+                "path": "uid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player_one",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "player_two"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "recent_slothashes",
+          "address": "SysvarS1otHashes111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_uid",
+          "type": "u64"
+        },
+        {
+          "name": "player_one",
+          "type": "pubkey"
+        },
+        {
+          "name": "player_two",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "shoot",
+      "discriminator": [41, 43, 22, 19, 8, 30, 7, 103],
+      "accounts": [
+        {
+          "name": "session",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 101, 115, 115, 105, 111, 110]
+              },
+              {
+                "kind": "account",
+                "path": "player_one"
+              },
+              {
+                "kind": "account",
+                "path": "player_two"
+              },
+              {
+                "kind": "arg",
+                "path": "uid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "shooter",
+          "signer": true
+        },
+        {
+          "name": "player_one",
+          "writable": true
+        },
+        {
+          "name": "player_two",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "_uid",
+          "type": "u64"
+        },
+        {
+          "name": "target",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "transfer_bet",
+      "discriminator": [61, 83, 8, 3, 100, 209, 178, 95],
+      "accounts": [
+        {
+          "name": "session",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 101, 115, 115, 105, 111, 110]
+              },
+              {
+                "kind": "account",
+                "path": "player_one"
+              },
+              {
+                "kind": "account",
+                "path": "player_two"
+              },
+              {
+                "kind": "arg",
+                "path": "uid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "player_one"
+        },
+        {
+          "name": "player_two"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_uid",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Session",
+      "discriminator": [243, 81, 72, 115, 214, 188, 72, 144]
+    }
+  ],
+  "events": [
+    {
+      "name": "MementoMori",
+      "discriminator": [119, 151, 207, 175, 37, 122, 13, 239]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "SessionAlreadyOver",
+      "msg": "Session is over"
+    },
+    {
+      "code": 6001,
+      "name": "SessionAlreadyStarted",
+      "msg": "Session has started"
+    },
+    {
+      "code": 6002,
+      "name": "NotYourTurn",
+      "msg": "It is not your turn"
+    },
+    {
+      "code": 6003,
+      "name": "TriggerOutOfBounds",
+      "msg": "Trigger exceeded out of bounds"
+    },
+    {
+      "code": 6004,
+      "name": "InternalGameError",
+      "msg": "Some logic error!"
+    }
+  ],
+  "types": [
+    {
+      "name": "MementoMori",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "shooter",
+            "type": "pubkey"
+          },
+          {
+            "name": "target",
+            "type": "pubkey"
+          },
+          {
+            "name": "winner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Session",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "player_one",
+            "type": "pubkey"
+          },
+          {
+            "name": "player_two",
+            "type": "pubkey"
+          },
+          {
+            "name": "turn",
+            "type": "bool"
+          },
+          {
+            "name": "load",
+            "type": {
+              "array": ["bool", 6]
+            }
+          },
+          {
+            "name": "trigger",
+            "type": "u8"
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "State"
+              }
+            }
+          },
+          {
+            "name": "record",
+            "type": {
+              "array": ["u8", 6]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "State",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Inactive"
+          },
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Won",
+            "fields": [
+              {
+                "name": "winner",
+                "type": "pubkey"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
