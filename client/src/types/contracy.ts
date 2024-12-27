@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/roullete.json`.
  */
 export type Roullete = {
-  address: "C4CFz2gwxM2MUrLTgyzySfM3MTwCauFtKmStfhpZqYTD";
+  address: "BKRyhQnbYUESjAaS7X2n11nWKmouzBmNkD1XhXwPQ8df";
   metadata: {
     name: "roullete";
     version: "0.1.0";
@@ -25,6 +25,30 @@ export type Roullete = {
               {
                 kind: "const";
                 value: [115, 101, 115, 115, 105, 111, 110];
+              },
+              {
+                kind: "account";
+                path: "playerOne";
+              },
+              {
+                kind: "account";
+                path: "playerTwo";
+              },
+              {
+                kind: "arg";
+                path: "uid";
+              }
+            ];
+          };
+        },
+        {
+          name: "vault";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [118, 97, 117, 108, 116];
               },
               {
                 kind: "account";
@@ -102,6 +126,30 @@ export type Roullete = {
           };
         },
         {
+          name: "vault";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [118, 97, 117, 108, 116];
+              },
+              {
+                kind: "account";
+                path: "playerOne";
+              },
+              {
+                kind: "account";
+                path: "playerTwo";
+              },
+              {
+                kind: "arg";
+                path: "uid";
+              }
+            ];
+          };
+        },
+        {
           name: "shooter";
           signer: true;
         },
@@ -112,6 +160,10 @@ export type Roullete = {
         {
           name: "playerTwo";
           writable: true;
+        },
+        {
+          name: "systemProgram";
+          address: "11111111111111111111111111111111";
         }
       ];
       args: [
@@ -137,6 +189,30 @@ export type Roullete = {
               {
                 kind: "const";
                 value: [115, 101, 115, 115, 105, 111, 110];
+              },
+              {
+                kind: "account";
+                path: "playerOne";
+              },
+              {
+                kind: "account";
+                path: "playerTwo";
+              },
+              {
+                kind: "arg";
+                path: "uid";
+              }
+            ];
+          };
+        },
+        {
+          name: "vault";
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: "const";
+                value: [118, 97, 117, 108, 116];
               },
               {
                 kind: "account";
@@ -181,6 +257,10 @@ export type Roullete = {
     {
       name: "session";
       discriminator: [243, 81, 72, 115, 214, 188, 72, 144];
+    },
+    {
+      name: "vaultAccount";
+      discriminator: [230, 251, 241, 83, 139, 202, 93, 28];
     }
   ];
   events: [
@@ -302,6 +382,13 @@ export type Roullete = {
             ];
           }
         ];
+      };
+    },
+    {
+      name: "vaultAccount";
+      type: {
+        kind: "struct";
+        fields: [];
       };
     }
   ];

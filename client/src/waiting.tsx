@@ -5,7 +5,12 @@ import SignCard from "./SignCard";
 import { useGameContext } from "./context/GameContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { JoinInstruction, JoinResponse, QueueResponse } from "./types/support";
+import {
+  GoQueueAction,
+  JoinInstruction,
+  JoinResponse,
+  QueueResponse,
+} from "./types/support";
 import { toast } from "react-toastify";
 
 // CHECK: isPlayerOne needs to be called twice, socket closing
@@ -20,6 +25,58 @@ function Waiting() {
     useGameContext();
 
   useEffect(() => {
+    const join_queue_go = async () => {
+      if (!playerAddress) {
+        console.log("no public key");
+        navigate("/");
+        return;
+      }
+
+      let ws = new WebSocket(
+        `${process.env.REACT_APP_BACKEND_URL}/join/${playerAddress}`
+      );
+
+      ws.onopen = () => {
+        console.log("Connected to WebSocket");
+      };
+
+      ws.onclose = () => {
+        console.log("Disconnected from WebSocket");
+      };
+      ws.onmessage = (event) => {
+        let queue_msg: GoQueueAction = JSON.parse(event.data);
+
+        switch (queue_msg.status) {
+          case "ADDED":
+            console.log(queue_msg.content);
+            break;
+          case "FOUND":
+            setIsPlayerOne(true);
+            setJoinInstruction({
+              playerOne: playerAddress.toBase58(),
+              playerTwo: queue_msg.sender_address,
+              uid: Number(queue_msg.content),
+            });
+            openModal();
+            break;
+          case "READY":
+            setJoinInstruction({
+              playerOne: queue_msg.sender_address,
+              playerTwo: playerAddress.toBase58(),
+              uid: Number(queue_msg.content),
+            });
+            setIsPlayerOne(false);
+            console.log(queue_msg.content);
+            openModal();
+            break;
+          default:
+            console.log("random queue msg" + queue_msg.status);
+            break;
+        }
+      };
+
+      setSocket(ws);
+    };
     const join_queue = async () => {
       if (!playerAddress) {
         console.log("no public key");
@@ -113,7 +170,7 @@ function Waiting() {
           console.log(new_instruction);
           setJoinInstruction(new_instruction);
 
-          ws.close(1000, "Resetting socket for player one!");
+          // ws.close(1000, "Resetting socket for player one!");
 
           openModal();
         } else if (
@@ -121,7 +178,6 @@ function Waiting() {
           data.content &&
           data.status === "READY"
         ) {
-          // TODO: check if necessary data need to be sent
           console.log(
             `${data.sender_address}: ${data.content}, Status: ${data.status}`
           );
@@ -142,7 +198,8 @@ function Waiting() {
       }
     };
 
-    init();
+    // init();
+    join_queue_go();
 
     return () => {
       if (socket) {
@@ -179,9 +236,11 @@ function Waiting() {
         </div>
       </section>
       {/* <button onClick={openModal}>open</button> */}
-      <Modal isOpen={isModalOpen} onClose={closeModal} title="My Cool Modal">
-        <SignCard />
-      </Modal>
+      {socket && (
+        <Modal isOpen={isModalOpen} onClose={closeModal} title="My Cool Modal">
+          <SignCard sock={socket} />
+        </Modal>
+      )}
     </main>
   );
 }

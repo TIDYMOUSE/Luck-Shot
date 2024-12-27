@@ -14,7 +14,6 @@ declare_id!("C4CFz2gwxM2MUrLTgyzySfM3MTwCauFtKmStfhpZqYTD");
 
 #[program]
 pub mod roullete {
-
     use super::*;
 
     pub fn join_session(
@@ -35,13 +34,15 @@ pub mod roullete {
         // ! This doenst work, as user wallet is not owned  by system program so you cannot deduct, you can only deduct from pda
         // ctx.accounts.player.sub_lamports(LAMPORTS_PER_SOL / 100)?; // 0.01 sol as bet money
         // ctx.accounts.session.add_lamports(LAMPORTS_PER_SOL / 100)?;
+        //
+        // ! You don’t need to own the account you are transferring lamports to.
 
         system_program::transfer(
             CpiContext::new(
                 ctx.accounts.system_program.to_account_info(),
                 system_program::Transfer {
                     from: ctx.accounts.player.to_account_info(),
-                    to: ctx.accounts.session.to_account_info(),
+                    to: ctx.accounts.vault.to_account_info(),
                 },
             ),
             LAMPORTS_PER_SOL / 100,
@@ -66,25 +67,26 @@ pub mod roullete {
             }
         };
         ctx.accounts.session.shoot(shooter, target, code)?;
+
         if !ctx.accounts.session.is_active() {
             match ctx.accounts.session.get_state() {
                 State::Active | State::Inactive => {
                     return Err(RoulleteErrors::InternalGameError.into());
                 }
                 State::Won { winner } => {
-                    if winner == *ctx.accounts.player_one.key {
-                        ctx.accounts.session.sub_lamports(LAMPORTS_PER_SOL / 50)?;
-                        ctx.accounts
-                            .player_one
-                            .add_lamports(LAMPORTS_PER_SOL / 50)?;
+                    let transfer_amount = LAMPORTS_PER_SOL / 50;
+                    // let vault_account = ctx.accounts.vault.to_account_info();
+
+                    let recipient = if winner == *ctx.accounts.player_one.key {
+                        ctx.accounts.player_one.to_account_info()
                     } else if winner == ctx.accounts.player_two.key() {
-                        ctx.accounts.session.sub_lamports(LAMPORTS_PER_SOL / 50)?;
-                        ctx.accounts
-                            .player_two
-                            .add_lamports(LAMPORTS_PER_SOL / 50)?;
+                        ctx.accounts.player_two.to_account_info()
                     } else {
                         return Err(RoulleteErrors::InternalGameError.into());
-                    }
+                    };
+
+                    ctx.accounts.vault.sub_lamports(transfer_amount)?;
+                    recipient.add_lamports(transfer_amount)?;
                 }
             }
         }
@@ -103,6 +105,14 @@ pub struct JoinSession<'info> {
         space=Session::MAX_SIZE + 8
     )]
     pub session: Account<'info, Session>,
+    #[account(
+        init_if_needed,
+        payer=player_one,
+        seeds=[ b"vault", player_one.key().as_ref(), player_two.key().as_ref(), uid.to_le_bytes().as_ref()],
+        bump,
+        space = 8
+    )]
+    pub vault: Account<'info, VaultAccount>,
     #[account(mut)]
     pub player_one: Signer<'info>,
     /// CHECK: account constraints checked in account trait
@@ -122,6 +132,12 @@ pub struct TransferBet<'info> {
         bump,
     )]
     pub session: Account<'info, Session>,
+    #[account(
+        mut,
+        seeds=[ b"vault", player_one.key().as_ref(), player_two.key().as_ref(), uid.to_le_bytes().as_ref()],
+        bump,
+    )]
+    pub vault: Account<'info, VaultAccount>,
     #[account(mut)]
     pub player: Signer<'info>,
     /// CHECK: account constraints checked in account trait
@@ -140,12 +156,22 @@ pub struct Shoot<'info> {
         bump
     )]
     pub session: Account<'info, Session>,
+    #[account(
+        mut,
+        seeds=[ b"vault", player_one.key().as_ref(), player_two.key().as_ref(), uid.to_le_bytes().as_ref()],
+        bump,
+    )]
+    pub vault: Account<'info, VaultAccount>,
     #[account(signer)]
     pub shooter: Signer<'info>,
-    #[account(mut)]
     /// CHECK: account constraints checked in account trait
+    #[account(mut)]
     pub player_one: AccountInfo<'info>,
-    #[account(mut)]
     /// CHECK: account constraints checked in account trait
+    #[account(mut)]
     pub player_two: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
 }
+
+#[account]
+pub struct VaultAccount {}

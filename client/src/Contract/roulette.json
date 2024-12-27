@@ -1,5 +1,5 @@
 {
-  "address": "C4CFz2gwxM2MUrLTgyzySfM3MTwCauFtKmStfhpZqYTD",
+  "address": "BKRyhQnbYUESjAaS7X2n11nWKmouzBmNkD1XhXwPQ8df",
   "metadata": {
     "name": "roullete",
     "version": "0.1.0",
@@ -9,7 +9,16 @@
   "instructions": [
     {
       "name": "join_session",
-      "discriminator": [23, 92, 4, 160, 155, 56, 164, 253],
+      "discriminator": [
+        23,
+        92,
+        4,
+        160,
+        155,
+        56,
+        164,
+        253
+      ],
       "accounts": [
         {
           "name": "session",
@@ -18,7 +27,45 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 101, 115, 115, 105, 111, 110]
+                "value": [
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "player_one"
+              },
+              {
+                "kind": "account",
+                "path": "player_two"
+              },
+              {
+                "kind": "arg",
+                "path": "uid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
               },
               {
                 "kind": "account",
@@ -69,7 +116,16 @@
     },
     {
       "name": "shoot",
-      "discriminator": [41, 43, 22, 19, 8, 30, 7, 103],
+      "discriminator": [
+        41,
+        43,
+        22,
+        19,
+        8,
+        30,
+        7,
+        103
+      ],
       "accounts": [
         {
           "name": "session",
@@ -78,7 +134,45 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 101, 115, 115, 105, 111, 110]
+                "value": [
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "player_one"
+              },
+              {
+                "kind": "account",
+                "path": "player_two"
+              },
+              {
+                "kind": "arg",
+                "path": "uid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
               },
               {
                 "kind": "account",
@@ -106,6 +200,10 @@
         {
           "name": "player_two",
           "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
@@ -121,7 +219,16 @@
     },
     {
       "name": "transfer_bet",
-      "discriminator": [61, 83, 8, 3, 100, 209, 178, 95],
+      "discriminator": [
+        61,
+        83,
+        8,
+        3,
+        100,
+        209,
+        178,
+        95
+      ],
       "accounts": [
         {
           "name": "session",
@@ -130,7 +237,45 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 101, 115, 115, 105, 111, 110]
+                "value": [
+                  115,
+                  101,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "player_one"
+              },
+              {
+                "kind": "account",
+                "path": "player_two"
+              },
+              {
+                "kind": "arg",
+                "path": "uid"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
               },
               {
                 "kind": "account",
@@ -174,13 +319,44 @@
   "accounts": [
     {
       "name": "Session",
-      "discriminator": [243, 81, 72, 115, 214, 188, 72, 144]
+      "discriminator": [
+        243,
+        81,
+        72,
+        115,
+        214,
+        188,
+        72,
+        144
+      ]
+    },
+    {
+      "name": "VaultAccount",
+      "discriminator": [
+        230,
+        251,
+        241,
+        83,
+        139,
+        202,
+        93,
+        28
+      ]
     }
   ],
   "events": [
     {
       "name": "MementoMori",
-      "discriminator": [119, 151, 207, 175, 37, 122, 13, 239]
+      "discriminator": [
+        119,
+        151,
+        207,
+        175,
+        37,
+        122,
+        13,
+        239
+      ]
     }
   ],
   "errors": [
@@ -251,7 +427,10 @@
           {
             "name": "load",
             "type": {
-              "array": ["bool", 6]
+              "array": [
+                "bool",
+                6
+              ]
             }
           },
           {
@@ -269,7 +448,10 @@
           {
             "name": "record",
             "type": {
-              "array": ["u8", 6]
+              "array": [
+                "u8",
+                6
+              ]
             }
           }
         ]
@@ -296,6 +478,13 @@
             ]
           }
         ]
+      }
+    },
+    {
+      "name": "VaultAccount",
+      "type": {
+        "kind": "struct",
+        "fields": []
       }
     }
   ]

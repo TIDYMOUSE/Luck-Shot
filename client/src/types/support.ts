@@ -15,6 +15,12 @@ export interface Action {
   status?: "FOUND" | "READY";
   passcode: String;
 }
+
+export interface GoQueueAction {
+  sender_address: string;
+  status: "FOUND" | "READY" | "ADDED";
+  content: string;
+}
 export interface ShootResponse {
   shooter: string;
   target: string;

@@ -104,10 +104,16 @@ function Board() {
       return;
     }
 
+    // const ws = new WebSocket(
+    //   `${
+    //     process.env.REACT_APP_BACKEND_URL
+    //   }/start/${playerAddress?.toBase58()}/${uid.toString()}`
+    // );
+
     const ws = new WebSocket(
       `${
         process.env.REACT_APP_BACKEND_URL
-      }/start/${playerAddress?.toBase58()}/${uid.toString()}`
+      }/game/${playerAddress?.toBase58()}/${uid.toString()}`
     );
 
     ws.onopen = () => {
@@ -139,7 +145,7 @@ function Board() {
       if (data.shooter && data.target && data.videoId) {
         let literal = `./assets/${data.videoId.toString()}.mp4`;
         setVideoUrl(literal);
-        console.log(literal);
+        console.log(`Received video id: ${literal}`);
         try {
           let session = await program.account.session.fetch(gameKey);
           if (data.videoId.endsWith("opp_die")) {
@@ -148,8 +154,7 @@ function Board() {
           } else if (data.videoId.endsWith("self_die")) {
             setSelfWin(false);
             openModal();
-          }
-          if (session.state.active) {
+          } else if (!data.videoId.includes("opp_opp")) {
             setTurn(!turn);
           }
         } catch {
@@ -235,33 +240,32 @@ function Board() {
     }
     let session = await program.account.session.fetch(gameKey);
 
-    // let session = await program.account.session.fetch(gameKey);
-    let i;
-    for (i = 0; i < 6; i++) {
-      if (session.record[i] === 0) {
-        break;
-      }
-    }
+    // let i;
+    // for (i = 0; i < 6; i++) {
+    //   if (session.record[i] === 0) {
+    //     break;
+    //   }
+    // }
 
-    i = i - 1;
-    if (i === -1) {
-      i = 0;
-    }
+    // i = i - 1;
+    // if (i === -1) {
+    //   i = 0;
+    // }
 
-    if (session.load[session.trigger]) {
-      sendAction({
-        action: "ShootInstruction",
-        shooter_address: playerAddress.toBase58(),
-        target_address: playerAddress.toBase58(),
-        video_id: VideoId.ShootOppOppDie,
-        passcode: process.env.REACT_APP_PASSCODE ?? "",
-      });
-      setVideoUrl("./assets/shoot_self_opp_die.mp4");
-      setPlaying(false);
-      setTimeout(() => setPlaying(true), 100);
-      setSelfWin(!isPlayerOne);
-      openModal();
-    }
+    // if (session.load[i]) {
+    //   sendAction({
+    //     action: "ShootInstruction",
+    //     shooter_address: playerAddress.toBase58(),
+    //     target_address: playerAddress.toBase58(),
+    //     video_id: VideoId.ShootOppOppDie,
+    //     passcode: process.env.REACT_APP_PASSCODE ?? "",
+    //   });
+    //   setVideoUrl("./assets/shoot_self_opp_die.mp4");
+    //   setPlaying(false);
+    //   setTimeout(() => setPlaying(true), 100);
+    //   setSelfWin(!isPlayerOne);
+    //   openModal();
+    // }
 
     if (session.state.active) {
       sendAction({
@@ -278,7 +282,7 @@ function Board() {
     } else if (session.state.won) {
       let winner = session.state.won.winner;
       let calc_winner = isPlayerOne ? playerTwo : playerOne;
-      if (winner === calc_winner) {
+      if (winner !== calc_winner) {
         // ! handle this
         console.log("GAME ERROR!!!!!");
       }
@@ -293,7 +297,10 @@ function Board() {
 
       setVideoUrl("./assets/shoot_self_self_die.mp4");
       setPlaying(false);
-      // setTimeout(() => setPlaying(true), 100);
+      setTimeout(() => setPlaying(true), 100);
+      setSelfWin(false);
+      setTimeout(() => {}, 8000);
+      openModal();
     } else {
       console.log("GAME ERRORR");
     }
@@ -338,21 +345,25 @@ function Board() {
     //     break;
     //   }
     // }
+    // i = i - 1;
+    // if (i === -1) {
+    //   i = 0;
+    // }
 
-    if (session.load[session.trigger]) {
-      sendAction({
-        action: "ShootInstruction",
-        shooter_address: playerAddress.toBase58(),
-        target_address: opp.toBase58(),
-        video_id: VideoId.ShootOppSelfDie,
-        passcode: process.env.REACT_APP_PASSCODE ?? "",
-      });
-      setVideoUrl("./assets/shoot_self_opp_die.mp4");
-      setPlaying(false);
-      setTimeout(() => setPlaying(true), 100);
-      setSelfWin(isPlayerOne);
-      openModal();
-    }
+    // if (session.load[i]) {
+    //   sendAction({
+    //     action: "ShootInstruction",
+    //     shooter_address: playerAddress.toBase58(),
+    //     target_address: opp.toBase58(),
+    //     video_id: VideoId.ShootOppSelfDie,
+    //     passcode: process.env.REACT_APP_PASSCODE ?? "",
+    //   });
+    //   setVideoUrl("./assets/shoot_self_opp_die.mp4");
+    //   setPlaying(false);
+    //   setTimeout(() => setPlaying(true), 100);
+    //   setSelfWin(isPlayerOne);
+    //   openModal();
+    // }
 
     if (session.state.active) {
       sendAction({
@@ -384,7 +395,8 @@ function Board() {
       setVideoUrl("./assets/shoot_self_opp_die.mp4");
       setPlaying(false);
       setTimeout(() => setPlaying(true), 100);
-      setSelfWin(winner === playerAddress);
+      setSelfWin(true);
+      setTimeout(() => {}, 8000);
       openModal();
     } else {
       console.log("GAME ERROR");
@@ -484,3 +496,25 @@ export default Board;
 
 // No wonder you can't sleep.
 // you won but at what cost?
+
+// Error shooting self:
+// Proxy { <target>: Error, <handler>: {…} }
+// ​
+// <target>: Error: Simulation failed.
+// Message: Transaction simulation failed: Error processing Instruction 2: Program arithmetic overflowed.
+// Logs:
+// [
+//   "Program ComputeBudget111111111111111111111111111111 invoke [1]",
+//   "Program ComputeBudget111111111111111111111111111111 success",
+//   "Program ComputeBudget111111111111111111111111111111 invoke [1]",
+//   "Program ComputeBudget111111111111111111111111111111 success",
+//   "Program BKRyhQnbYUESjAaS7X2n11nWKmouzBmNkD1XhXwPQ8df invoke [1]",
+//   "Program log: Instruction: Shoot",
+//   "Program data: d5fPryV6De+JCQQ/RpTuUf/zm6M1aZIsncqNikMTGoGhkvp5c+9RxgwKqHjMcn9g2PFNosJGH+b3HtSWxuOF9Ucy5QTqA7MsiQkEP0aU7lH/85ujNWmSLJ3KjYpDExqBoZL6eXPvUcY=",
+//   "Program log: ProgramError occurred. Error Code: ArithmeticOverflow. Error Number: 103079215104. Error Message: Program arithmetic overflowed.",
+//   "Program BKRyhQnbYUESjAaS7X2n11nWKmouzBmNkD1XhXwPQ8df consumed 8752 of 199700 compute units",
+//   "Program BKRyhQnbYUESjAaS7X2n11nWKmouzBmNkD1XhXwPQ8df failed: Program arithmetic overflowed"
+// ].
+// Catch the `SendTransactionError` and call `getLogs()` on it for full details.
+// ​
+// <handler

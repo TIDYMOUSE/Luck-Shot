@@ -10,14 +10,19 @@ import {
   useConnection,
   useWallet,
 } from "@solana/wallet-adapter-react";
-import { Action } from "./types/support";
+import { Action, GoQueueAction } from "./types/support";
 
-function SignCard() {
-  const { uid, playerAddress, join_instruction } = useGameContext();
+interface SignCardProps {
+  sock: WebSocket;
+}
+
+function SignCard({ sock }: SignCardProps) {
+  const { uid, playerAddress, join_instruction, isPlayerOne } =
+    useGameContext();
   const navigate = useNavigate();
   const wallet = useWallet();
   const { connection } = useConnection();
-  console.log(connection);
+  // console.log(connection);
   const provider = new anchor.AnchorProvider(
     connection,
     wallet as AnchorWallet,
@@ -64,11 +69,12 @@ function SignCard() {
       navigate("/");
     }
     if (
+      !playerAddress ||
       !join_instruction ||
       !join_instruction.playerOne ||
       !join_instruction.playerTwo
     ) {
-      console.log(join_instruction);
+      console.log(playerAddress, join_instruction);
       navigate("/");
       return;
     }
@@ -78,54 +84,85 @@ function SignCard() {
     let sessionAddress = getSessionAddress(playerOne, playerTwo, program, uid);
 
     try {
-      let tx = await program.methods
-        .joinSession(new anchor.BN(uid), playerOne, playerTwo)
-        .accounts({
-          playerOne: playerOne,
-          playerTwo: playerTwo,
-        })
+      if (isPlayerOne) {
+        await program.methods
+          .joinSession(new anchor.BN(uid), playerOne, playerTwo)
+          .accounts({
+            playerOne: playerOne,
+            playerTwo: playerTwo,
+          })
+          .rpc();
+      }
+
+      await program.methods
+        .transferBet(new anchor.BN(uid))
+        .accounts({ playerOne, playerTwo, player: playerAddress })
         .rpc();
 
-      console.log(tx);
       await checkGameStats(program, sessionAddress);
     } catch (e) {
       console.log(e);
     }
 
-    const reconnectWebSocket = () => {
-      if (!playerAddress || !uid) {
-        console.log(playerAddress, uid);
-        return;
-      }
-      const newWs = new WebSocket(
-        `${
-          process.env.REACT_APP_BACKEND_URL
-        }/start/${playerAddress?.toBase58()}/${uid.toString()}`
+    // const reconnectWebSocket = () => {
+    //   if (!playerAddress || !uid) {
+    //     console.log(playerAddress, uid);
+    //     return;
+    //   }
+    //   const newWs = new WebSocket(
+    //     `${
+    //       process.env.REACT_APP_BACKEND_URL
+    //     }/start/${playerAddress?.toBase58()}/${uid.toString()}`
+    //   );
+
+    //   newWs.onclose = () => {
+    //     console.log("WebSocket closed after reconnection");
+    //   };
+
+    //   newWs.onopen = () => {
+    //     console.log("Reconnected to WebSocket, sending READY message");
+    //     const ready_message: Action = {
+    //       action: "QueueUpdate",
+    //       sender_address: playerAddress?.toBase58(),
+    //       content: `${isPlayerOne ? "playerOne" : "playerTwo"} is ready!!`,
+    //       passcode: process.env.REACT_APP_PASSCODE ?? "",
+    //       status: "READY",
+    //     };
+    //     newWs.send(JSON.stringify(ready_message));
+    //     newWs.close(
+    //       1000,
+    //       `${isPlayerOne ? "playerOne" : "playerTwo"} moving to board`
+    //     );
+    //     console.log("READY message sent successfully");
+    //   };
+
+    //   newWs.onerror = (error) => {
+    //     console.error("WebSocket error during reconnection:", error);
+    //   };
+    // };
+    // reconnectWebSocket();
+
+    // ----------------------------------------------------------
+    // const ready_message: Action = {
+    //   action: "QueueUpdate",
+    //   sender_address: playerAddress?.toBase58(),
+    //   content: `${isPlayerOne ? "playerOne" : "playerTwo"} is ready!!`,
+    //   passcode: process.env.REACT_APP_PASSCODE ?? "",
+    //   status: "READY",
+    // };
+    //-------------------------------------------------------------
+    if (isPlayerOne) {
+      let ready_message: GoQueueAction = {
+        sender_address: playerAddress.toBase58(),
+        status: "READY",
+        content: join_instruction.uid.toString(),
+      };
+      sock.send(JSON.stringify(ready_message));
+      sock.close(
+        1000,
+        `${isPlayerOne ? "playerOne" : "playerTwo"} moving to board`
       );
-
-      newWs.onclose = () => {
-        console.log("WebSocket closed after reconnection");
-      };
-
-      newWs.onopen = () => {
-        console.log("Reconnected to WebSocket, sending READY message");
-        const ready_message: Action = {
-          action: "QueueUpdate",
-          sender_address: playerAddress?.toBase58(),
-          content: "Player one is ready!!",
-          passcode: process.env.REACT_APP_PASSCODE ?? "",
-          status: "READY",
-        };
-        newWs.send(JSON.stringify(ready_message));
-        newWs.close(1000, "player one moving to board");
-        console.log("READY message sent successfully");
-      };
-
-      newWs.onerror = (error) => {
-        console.error("WebSocket error during reconnection:", error);
-      };
-    };
-    reconnectWebSocket();
+    }
     navigate("/board");
   };
   return (

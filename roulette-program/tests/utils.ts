@@ -27,7 +27,7 @@ async function shoot_s(
   player_one: anchor.web3.PublicKey,
   player_two: anchor.web3.PublicKey,
   target: anchor.web3.PublicKey,
-  signer: [anchor.web3.Keypair],
+  signer: [anchor.web3.Keypair] | [],
   uid: anchor.BN
 ) {
   await program.methods
@@ -57,27 +57,28 @@ async function getBalances(
   status: string,
   conn: anchor.web3.Connection,
   gameKeypair: anchor.web3.PublicKey,
+  VaultKeyPair: anchor.web3.PublicKey,
   playerOne: anchor.web3.PublicKey,
-  playerTwo: anchor.web3.PublicKey,
-  uncheckedAccPubkey: anchor.web3.PublicKey
+  playerTwo: anchor.web3.PublicKey
 ) {
-  // console.log(`
-  // ------------------------------------------------------------------------------------------------------------
-  //   ${status} balances :
-  //   gamekeypair (${gameKeypair}): ${convertLamportToSol(
-  //   await conn.getBalance(gameKeypair)
-  // )} sol
-  //   playerone (${playerOne}) : ${convertLamportToSol(
-  //   await conn.getBalance(playerOne)
-  // )} sol
-  //   playertwo (${playerTwo}) : ${convertLamportToSol(
-  //   await conn.getBalance(playerTwo)
-  // )} sol
-  //   unchecked account (${uncheckedAccPubkey}) : ${convertLamportToSol(
-  //   await conn.getBalance(uncheckedAccPubkey)
-  // )} sol
-  // ------------------------------------------------------------------------------------------------------------
-  // `);
+  console.log(`
+  ------------------------------------------------------------------------------------------------------------
+    ${status} balances :
+    gamekeypair (${gameKeypair}): ${convertLamportToSol(
+    await conn.getBalance(gameKeypair)
+  )} sol
+   Vault: (${VaultKeyPair}) : ${convertLamportToSol(
+    await conn.getBalance(VaultKeyPair)
+  )} sol
+    playerone (${playerOne}) : ${convertLamportToSol(
+    await conn.getBalance(playerOne)
+  )} sol
+    playertwo (${playerTwo}) : ${convertLamportToSol(
+    await conn.getBalance(playerTwo)
+  )} sol
+    
+  ------------------------------------------------------------------------------------------------------------
+  `);
 }
 
 type Event = anchor.IdlEvents<Roullete>;

@@ -10,6 +10,7 @@ import {
   shoot_s,
   getEvent,
 } from "./utils";
+import { Wallet } from "@coral-xyz/anchor/dist/cjs/provider";
 
 //!IMPORTANT: equal, equals and eq is same which are strict equality (===)
 // whereas eql and eqls are same meaning deep equality ( for objects and arrays )
@@ -17,24 +18,33 @@ import {
 describe("ROULETTE", async () => {
   let program: Program<Roullete>;
   let gameKeypair: anchor.web3.PublicKey;
-  // let playerOne: Wallet;
-  let playerOne: anchor.web3.Keypair;
+  let VaultKeyPair: anchor.web3.PublicKey;
+  let playerOne: Wallet;
+  // let playerOne: anchor.web3.Keypair;
   let playerTwo: anchor.web3.Keypair;
-  let uncheckedAccPubkey: anchor.web3.PublicKey;
-  anchor.setProvider(anchor.AnchorProvider.env());
+  anchor.setProvider(anchor.AnchorProvider.local());
 
   const uid = new anchor.BN(1);
 
   before(async () => {
     //setting accounts
     program = anchor.workspace.Roullete as Program<Roullete>;
-    // playerOne = (program.provider as anchor.AnchorProvider).wallet;
-    playerOne = anchor.web3.Keypair.generate();
-    uncheckedAccPubkey = anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY;
+    playerOne = (program.provider as anchor.AnchorProvider).wallet;
+    // playerOne = anchor.web3.Keypair.generate();
+    // uncheckedAccPubkey = anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY;
     playerTwo = anchor.web3.Keypair.generate();
     [gameKeypair] = anchor.web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("session"),
+        playerOne.publicKey.toBuffer(),
+        playerTwo.publicKey.toBuffer(),
+        new anchor.BN(1).toArrayLike(Buffer, "le", 8),
+      ],
+      program.programId
+    );
+    [VaultKeyPair] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("vault"),
         playerOne.publicKey.toBuffer(),
         playerTwo.publicKey.toBuffer(),
         new anchor.BN(1).toArrayLike(Buffer, "le", 8),
@@ -54,9 +64,9 @@ describe("ROULETTE", async () => {
           "initial",
           program.provider.connection,
           gameKeypair,
+          VaultKeyPair,
           playerOne.publicKey,
-          playerTwo.publicKey,
-          uncheckedAccPubkey
+          playerTwo.publicKey
         )
     );
 
@@ -66,9 +76,9 @@ describe("ROULETTE", async () => {
           "final",
           program.provider.connection,
           gameKeypair,
+          VaultKeyPair,
           playerOne.publicKey,
-          playerTwo.publicKey,
-          uncheckedAccPubkey
+          playerTwo.publicKey
         )
     );
     it("Players added", async () => {
@@ -78,7 +88,7 @@ describe("ROULETTE", async () => {
           playerOne: playerOne.publicKey,
           playerTwo: playerTwo.publicKey,
         })
-        .signers([playerOne])
+        // .signers([playerOne])
         .rpc()
         .catch((err) => console.log("hehee", err));
 
@@ -89,7 +99,7 @@ describe("ROULETTE", async () => {
           playerOne: playerOne.publicKey,
           playerTwo: playerTwo.publicKey,
         })
-        .signers([playerOne])
+        // .signers([playerOne])
         .rpc()
         .catch((err) => console.log(err));
       await program.methods
@@ -142,9 +152,9 @@ describe("ROULETTE", async () => {
           "initial",
           program.provider.connection,
           gameKeypair,
+          VaultKeyPair,
           playerOne.publicKey,
-          playerTwo.publicKey,
-          uncheckedAccPubkey
+          playerTwo.publicKey
         )
     );
 
@@ -154,9 +164,9 @@ describe("ROULETTE", async () => {
           "final",
           program.provider.connection,
           gameKeypair,
+          VaultKeyPair,
           playerOne.publicKey,
-          playerTwo.publicKey,
-          uncheckedAccPubkey
+          playerTwo.publicKey
         )
     );
     it("Turn Increases", async () => {
@@ -172,7 +182,8 @@ describe("ROULETTE", async () => {
             playerOne.publicKey,
             playerTwo.publicKey,
             playerTwo.publicKey,
-            [playerOne],
+            // [playerOne],
+            [],
             uid
           );
         });
@@ -203,7 +214,8 @@ describe("ROULETTE", async () => {
           playerOne.publicKey,
           playerTwo.publicKey,
           playerTwo.publicKey,
-          [playerOne],
+          // [playerOne],
+          [],
           uid
         );
         expect(
@@ -232,7 +244,8 @@ describe("ROULETTE", async () => {
                   playerOne.publicKey,
                   playerTwo.publicKey,
                   playerOne.publicKey,
-                  [playerOne],
+                  // [playerOne],
+                  [],
                   uid
                 );
               });
@@ -280,7 +293,8 @@ describe("ROULETTE", async () => {
                 playerOne.publicKey,
                 playerTwo.publicKey,
                 playerTwo.publicKey,
-                [playerOne],
+                // [playerOne],
+                [],
                 uid
               );
             } else {
@@ -327,7 +341,7 @@ describe("ROULETTE", async () => {
             playerOne: playerOne.publicKey,
             playerTwo: playerTwo.publicKey,
           })
-          .signers([playerOne])
+          // .signers([playerOne])
           .rpc();
       } catch (err) {
         expect(err).to.be.instanceOf(anchor.AnchorError);
@@ -349,7 +363,8 @@ describe("ROULETTE", async () => {
             playerOne: playerOne.publicKey,
             playerTwo: playerTwo.publicKey,
           })
-          .signers(player_one_turn ? [playerOne] : [playerTwo])
+          // .signers(player_one_turn ? [playerOne] : [playerTwo])
+          .signers(player_one_turn ? [] : [playerTwo])
           .rpc();
       } catch (err) {
         expect(err).to.be.instanceOf(anchor.AnchorError);
@@ -377,7 +392,7 @@ describe("ROULETTE", async () => {
       await program.methods
         .joinSession(new anchor.BN(2), p1.publicKey, p2.publicKey)
         .accounts({ playerOne: p1.publicKey, playerTwo: p2.publicKey })
-        .signers([p1])
+        // .signers([p1])
         .rpc()
         .catch((err) => {
           console.log(err);
@@ -390,7 +405,7 @@ describe("ROULETTE", async () => {
           playerOne: p1.publicKey,
           playerTwo: p2.publicKey,
         })
-        .signers([p1])
+        // .signers([p1])
         .rpc()
         .catch((e) => console.log(e));
       await program.methods
@@ -447,7 +462,8 @@ describe("ROULETTE", async () => {
         p1.publicKey,
         p2.publicKey,
         p2.publicKey,
-        [p1],
+        // [p1],
+        [],
         new anchor.BN(2)
       );
       expect((await program.account.session.fetch(ng)).turn).is.equal(
